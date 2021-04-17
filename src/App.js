@@ -27,22 +27,37 @@ function App() {
           className="w-96 h-24 border-2 border-white rounded-md flex items-center justify-between px-4 mb-4"
         >
           <div>
-            <div className="text-lg text-left">
+            <p
+              className="text-lg text-left"
+              style={
+                item.done
+                  ? { textDecoration: "line-through" }
+                  : { textDecoration: "none" }
+              }
+            >
               {i + 1 + ".  "}
               {item.name}
-            </div>
+            </p>
             <div className="text-sm mt-3 self-start text-left">{item.time}</div>
           </div>
           <button
+            className="mr-4"
             onClick={() => {
               let currentList = list;
-              currentList = currentList.filter((item, index) => index !== i);
+              db.collection("list").doc(item.index.toString()).update({
+                done: !item.done,
+              });
+            }}
+          >
+            Done
+          </button>
+          <button
+            onClick={() => {
               db.collection("list")
                 .doc(item.index.toString())
                 .delete()
                 .then((res) => console.log(res))
                 .catch((res) => console.log(res));
-              setList(currentList);
             }}
           >
             Delete
@@ -64,12 +79,6 @@ function App() {
       })
       .then((res) => console.log("added successfully"))
       .catch((err) => console.log(err));
-    currentList.push({
-      name: input,
-      time: new Date().toLocaleString("en-US"),
-      index: currentList.length,
-    });
-    setList(currentList);
     setInput("");
   };
   return (
