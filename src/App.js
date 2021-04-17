@@ -1,17 +1,30 @@
 import logo from "./logo.svg";
 import React from "react";
 import "./App.css";
+import { db } from "./index.js";
 
 function App() {
   const [list, setList] = React.useState([]);
 
   const [input, setInput] = React.useState("");
+
+  React.useEffect(() => {
+    db.collection("list").onSnapshot((res) => {
+      let dbList = [];
+      res.forEach((r) => {
+        console.log(r.data());
+        dbList.push(r.data());
+      });
+      console.log(dbList);
+      setList(dbList);
+    });
+  }, []);
   const showList = (list) => {
     if (!list.length) return <></>;
     return list.map((item, i) => {
       return (
         <div
-          key={i}
+          key={item.index}
           className="w-96 h-24 border-2 border-white rounded-md flex items-center justify-between px-4 mb-4"
         >
           <div>
@@ -25,6 +38,11 @@ function App() {
             onClick={() => {
               let currentList = list;
               currentList = currentList.filter((item, index) => index !== i);
+              db.collection("list")
+                .doc(item.index.toString())
+                .delete()
+                .then((res) => console.log(res))
+                .catch((res) => console.log(res));
               setList(currentList);
             }}
           >
@@ -38,9 +56,19 @@ function App() {
   const AddListItem = (input) => {
     let currentList = list;
     if (!input) return null;
+    db.collection("list")
+      .doc(currentList.length.toString())
+      .set({
+        name: input,
+        time: new Date().toLocaleString("en-US"),
+        index: currentList.length,
+      })
+      .then((res) => console.log("added successfully"))
+      .catch((err) => console.log(err));
     currentList.push({
       name: input,
       time: new Date().toLocaleString("en-US"),
+      index: currentList.length,
     });
     setList(currentList);
     setInput("");
