@@ -43,7 +43,6 @@ function App() {
           <button
             className="mr-4"
             onClick={() => {
-              let currentList = list;
               db.collection("list").doc(item.index.toString()).update({
                 done: !item.done,
               });
